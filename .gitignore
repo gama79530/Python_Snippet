@@ -1,3 +1,5 @@
 .vscode
 main.py
 main.ipynb
+__pycache__
+*.pyc
