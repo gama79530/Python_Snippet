@@ -34,30 +34,30 @@ def backup_folder(source_path, target_path, mode=0) :
     """
 
     for root, dirs, files in os.walk(source_path) :
-        _root = root.replace(source_path, target_path)
-        if os.path.exists(_root) :
+        target_root = root.replace(source_path, target_path)
+        if os.path.exists(target_root) :
             if mode == 1 :
                 # remove dirs and files
-                for item in os.listdir(_root) :
-                    if os.path.isdir(os.path.join(_root, item)) and item not in dirs:
-                        shutil.rmtree(os.path.join(_root, item))
-                    elif os.path.isfile(os.path.join(_root, item)) and item not in files:
-                        os.remove(os.path.join(_root, item))
+                for item in os.listdir(target_root) :
+                    if os.path.isdir(os.path.join(target_root, item)) and item not in dirs:
+                        shutil.rmtree(os.path.join(target_root, item))
+                    elif os.path.isfile(os.path.join(target_root, item)) and item not in files:
+                        os.remove(os.path.join(target_root, item))
         else :
-            os.mkdir(_root)
+            os.mkdir(target_root)
 
         # copy dirs
-        for _dir in dirs :
-            t_dir = os.path.join(_root, _dir)
-            if not os.path.exists(t_dir) :
-                os.mkdir(t_dir)
+        for target_dir in dirs :
+            target_dir_path = os.path.join(target_root, target_dir)
+            if not os.path.exists(target_dir_path) :
+                os.mkdir(target_dir_path)
 
         # copy files
-        for _file in files :
-            s_file = os.path.join(root, _file)
-            t_file = os.path.join(_root, _file)
-            if not os.path.exists(t_file) or os.path.getsize(s_file) != os.path.getsize(t_file) :
-                shutil.copy2(s_file, t_file)
+        for target_file in files :
+            source_file_path = os.path.join(root, target_file)
+            target_file_path = os.path.join(target_root, target_file)
+            if not os.path.exists(target_file_path) or os.path.getsize(source_file_path) != os.path.getsize(target_file_path) :
+                shutil.copy2(source_file_path, target_file_path)
 
     print('====== Task finish!!! ======')
 
