@@ -1,7 +1,10 @@
 import random 
+import os, shutil
+
 def rand_sampling(ratio, stop, start=1) :
     """
     random sampling from close interval [start, stop]
+
     Args :
         ratio (float): percentage of sampling
         stop (int): upper bound of sampling interval
@@ -17,22 +20,23 @@ def rand_sampling(ratio, stop, start=1) :
     select_num = int(len(sample_pool) * ratio)
     return sorted(random.sample(sample_pool, select_num))
 
-import os, shutil
 def backup_folder(source_path, target_path, mode=0) :
     """
     Backup all files and folders in source_path to target_path
+    
     Args :
         source_path (str): absolute path which will be backup 
         target_path (str): absolute path which will place those backup files and floders
         mode (int): 
-            0 (sync) - sync source_path to target_path
-            1 (merge) - copy files in source_path to target_path
+            0 (merge) - copy files in source_path to target_path
+            1 (sync) - sync source_path to target_path
+
     """
 
     for root, dirs, files in os.walk(source_path) :
         _root = root.replace(source_path, target_path)
         if os.path.exists(_root) :
-            if mode == 0 :
+            if mode == 1 :
                 # remove dirs and files
                 for item in os.listdir(_root) :
                     if os.path.isdir(os.path.join(_root, item)) and item not in dirs:
@@ -56,3 +60,21 @@ def backup_folder(source_path, target_path, mode=0) :
                 shutil.copy2(s_file, t_file)
 
     print('====== Task finish!!! ======')
+
+def rand_file_sampling(source_path, target_path, ratio=0.5, sync_before=True):
+    """
+    Random sampling files from source_path to target_path
+
+    Args :
+        source_path (str): absolute path which will be sampled 
+        target_path (str): absolute path which will place those sampled files and floders
+        ratio: sampling ratio
+        sync_before: sync target_path files to source_path before sampling
+    
+    """
+    if sync_before:
+        backup_folder(target_path, source_path, 0)
+    
+    # count number of files
+    count = 0
+    
