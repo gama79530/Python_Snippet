@@ -3,3 +3,4 @@ main.py
 main.ipynb
 __pycache__
 *.pyc
+test*

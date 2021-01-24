@@ -20,7 +20,7 @@ def rand_sampling(ratio, stop, start=1) :
     select_num = int(len(sample_pool) * ratio)
     return sorted(random.sample(sample_pool, select_num))
 
-def backup_folder(source_path, target_path, mode=0) :
+def backup_folder(source_path, target_path, mode=0, verbose=True) :
     """
     Backup all files and folders in source_path to target_path
     
@@ -30,7 +30,7 @@ def backup_folder(source_path, target_path, mode=0) :
         mode (int): 
             0 (merge) - copy files in source_path to target_path
             1 (sync) - sync source_path to target_path
-
+        verbose(bool): print verbose message
     """
 
     for root, dirs, files in os.walk(source_path) :
@@ -58,10 +58,10 @@ def backup_folder(source_path, target_path, mode=0) :
             target_file_path = os.path.join(target_root, target_file)
             if not os.path.exists(target_file_path) or os.path.getsize(source_file_path) != os.path.getsize(target_file_path) :
                 shutil.copy2(source_file_path, target_file_path)
+    if verbose:
+        print('====== Task finish!!! ======')
 
-    print('====== Task finish!!! ======')
-
-def rand_file_sampling(source_path, target_path, ratio=0.5, sync_before=True):
+def rand_file_sampling(source_path, target_path, ratio=0.35, sync_before=True, verbose=True):
     """
     Random sampling files from source_path to target_path
 
@@ -70,11 +70,62 @@ def rand_file_sampling(source_path, target_path, ratio=0.5, sync_before=True):
         target_path (str): absolute path which will place those sampled files and floders
         ratio: sampling ratio
         sync_before: sync target_path files to source_path before sampling
+        verbose(bool): print verbose message
     
     """
-    if sync_before:
-        backup_folder(target_path, source_path, 0)
+    def mkdir(path):
+        if not os.path.exists(os.path.dirname(path)):
+            mkdir(os.path.dirname(path))
+        if not os.path.exists(path):
+            os.mkdir(path)
+        
+    if sync_before and os.path.exists(target_path):
+        backup_folder(target_path, source_path, 0, False)
     
     # count number of files
-    count = 0
+    total_count = 0
+    dirs_list = list()
+    for root, dirs, files in os.walk(source_path):
+        total_count += len(files)
+        dirs_list.append((root, files))
+
+    # sampling
+    random.shuffle(dirs_list)
+    sample_count = 0 
+    sample_num = min(int(ratio * total_count), total_count)
+    samples_list = list()
+    while sample_count < sample_num:
+        sample_root, sample_files = dirs_list.pop()
+        if len(sample_files) > 0:
+            samples_list.append((sample_root, sample_files))
+            sample_count += len(sample_files)
+
+    # rename target
+    target_temp_path = target_path + str(hash(__file__))
+    if os.path.exists(target_path):
+        os.rename(target_path, target_temp_path)
+    
+    # copy files
+    for sample_root, sample_files in samples_list:
+        target_root = sample_root.replace(source_path, target_path)
+        target_temp_root = target_root + str(hash(__file__))
+        mkdir(target_root)
+        for sample_file in sample_files:
+            sample_file_path = os.path.join(sample_root, sample_file)
+            target_file_path = os.path.join(target_root, sample_file)
+            target_temp_file_path = os.path.join(target_temp_root, sample_file)
+            if os.path.exists(target_temp_file_path) and os.path.getsize(target_temp_file_path) == os.path.getsize(sample_file_path):
+                os.rename(target_temp_file_path, target_file_path)
+            else:
+                shutil.copy2(sample_file_path, target_file_path)
+            
+    # delete unsampled files
+    if os.path.exists(target_temp_path):
+        shutil.rmtree(target_temp_path)
+
+    if verbose:
+        print('total files: ' + str(total_count))
+        print('sample files: ' + str(sample_count))
+        print('====== Task finish!!! ======')
+
     
