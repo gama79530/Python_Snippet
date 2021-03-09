@@ -80,6 +80,9 @@ def rand_file_sampling(source_path, target_path, is_dir_base, ratio=0.35, merge_
         if not os.path.exists(path):
             os.mkdir(path)
 
+    if verbose:
+        print('====== Start sampling!!! ======')
+
     # sync before    
     if merge_before and os.path.exists(target_path):
         backup_folder(target_path, source_path, 0, False)
