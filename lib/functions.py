@@ -100,6 +100,9 @@ def rand_file_sampling(source_path, target_path, is_dir_base, ratio=0.35, merge_
             for f in files:
                 sample_pool_list.append(os.path.join(root, f))
 
+    if verbose:
+        print('total files: ' + str(total_count))
+
     # sampling
     random.shuffle(sample_pool_list)
     sample_count = 0 
@@ -115,12 +118,15 @@ def rand_file_sampling(source_path, target_path, is_dir_base, ratio=0.35, merge_
     else:
         sample_count = sample_num
         samples_list = list(sample_pool_list[:sample_count])
+    
+    if verbose:
+        print('sample files: ' + str(sample_count))
 
     # rename target
     target_temp_path = target_path + str(hash(__file__))
     if os.path.exists(target_path):
         os.rename(target_path, target_temp_path)
-    
+
     # copy files
     if is_dir_base:
         for sample_root, sample_files in samples_list:
@@ -150,8 +156,6 @@ def rand_file_sampling(source_path, target_path, is_dir_base, ratio=0.35, merge_
         shutil.rmtree(target_temp_path)
 
     if verbose:
-        print('total files: ' + str(total_count))
-        print('sample files: ' + str(sample_count))
         print('====== Task finish!!! ======')
 
     
